@@ -26,6 +26,7 @@ type ScoredFilesystemEntry = FilesystemEntry & {
 }
 
 const FILE_SEARCH_TIMEOUT_MS = 10_000
+const VCS_METADATA_DIRECTORY_NAMES = new Set(['.git', '.svn', '.hg', '.bzr', '.jj', '.sl'])
 
 const IMAGE_MIME_TYPES: Record<string, string> = {
   '.png': 'image/png',
@@ -48,6 +49,10 @@ function isWithinRoot(targetPath: string, rootPath: string): boolean {
 function normalizeComparablePath(filePath: string): string {
   const resolved = path.resolve(filePath)
   return process.platform === 'win32' ? resolved.toLowerCase() : resolved
+}
+
+function isVcsMetadataDirectoryName(name: string): boolean {
+  return VCS_METADATA_DIRECTORY_NAMES.has(name.toLowerCase())
 }
 
 function isAllowedFilesystemPath(targetPath: string): boolean {
@@ -159,10 +164,9 @@ async function handleBrowse(url: URL): Promise<Response> {
 
     const entries = fs.readdirSync(resolvedPath, { withFileTypes: true })
 
-    // Browse mode: show all directories (and optionally files)
+    // Browse mode: show dot-prefixed project entries while keeping VCS internals hidden.
     const filtered = entries.filter((e) => {
-      if (e.name.startsWith('.')) return false
-      if (e.isDirectory()) return true
+      if (e.isDirectory()) return !isVcsMetadataDirectoryName(e.name)
       return includeFiles
     })
 

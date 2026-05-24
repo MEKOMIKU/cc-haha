@@ -11,7 +11,12 @@ const MAX_PREVIEW_BYTES = 1024 * 1024
 const MAX_UNTRACKED_STAT_BYTES = 256 * 1024
 const GIT_TIMEOUT_MS = 5_000
 const MAX_GIT_BUFFER_BYTES = 2_000_000
+const VCS_METADATA_DIRECTORY_NAMES = new Set(['.git', '.svn', '.hg', '.bzr', '.jj', '.sl'])
 const execFile = promisify(execFileCallback)
+
+function isVcsMetadataDirectoryName(name: string): boolean {
+  return VCS_METADATA_DIRECTORY_NAMES.has(name.toLowerCase())
+}
 
 const LANGUAGE_MAP: Record<string, string> = {
   cjs: 'javascript',
@@ -512,7 +517,7 @@ export class WorkspaceService {
       }
     }
     const visibleEntries = entries
-      .filter((entry) => !entry.name.startsWith('.'))
+      .filter((entry) => !(entry.isDirectory() && isVcsMetadataDirectoryName(entry.name)))
       .sort((a, b) => {
         if (a.isDirectory() !== b.isDirectory()) {
           return a.isDirectory() ? -1 : 1
