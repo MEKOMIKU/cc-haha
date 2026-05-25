@@ -1,7 +1,5 @@
-# Fixes Compared with the Original Leaked Source
-
-
-The leaked source could not run directly. This repository mainly fixes the following issues:
+# Fixes 
+ could not run directly. This repository mainly fixes the following issues:
 
 | Issue | Root cause | Fix |
 |------|------|------|
